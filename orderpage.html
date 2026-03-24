@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Supplier Tracker — Orders</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    window.__SUPABASE_URL__ = "https://ngthitqzqtnvmsthwddl.supabase.co";
+    window.__SUPABASE_ANON_KEY__ = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5ndGhpdHF6cXRudm1zdGh3ZGRsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjkzNjQ5NTEsImV4cCI6MjA4NDk0MDk1MX0.MSC3lSHfazA4vpbM69lwzkzxpws7aiGAQk8oVPTZXNw";
+    window.__ADMIN_EMAILS__ = ["gshoes@gmail.com","marian@gmail.com","aron@gmail.com"];
+    window.__ATTACHMENTS_BUCKET__ = "order_attachments";
+  </script>
+  <script defer src="./app.js"></script>
+  <style>
+    :root{--bg:#070b15;--text:#e8ecff;--muted:#9aa6cf;--accent:#7c5cff;--danger:#ff6b6b;--ok:#33d69f;--border:#233055;--shadow:0 18px 60px rgba(0,0,0,.55);--radius:16px}
+    *{box-sizing:border-box} body{margin:0;background:radial-gradient(1200px 500px at 50% 0%, rgba(124,92,255,.18), transparent 62%),radial-gradient(900px 500px at 10% 10%, rgba(51,214,159,.10), transparent 60%),var(--bg);color:var(--text);font:14px/1.4 ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Arial}
+    header{position:sticky;top:0;z-index:20;backdrop-filter:blur(14px);background:rgba(7,11,21,.55);border-bottom:1px solid rgba(35,48,85,.65)} .wrap{max-width:1280px;margin:0 auto;padding:16px}
+    .topbar,.actions,.filters,.tabs,.row2,.formActions,.kpiTools,.tracked-head{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.topbar{justify-content:space-between}.brand{display:flex;gap:10px;align-items:center}.badge{width:34px;height:34px;border-radius:12px;display:grid;place-items:center;background:rgba(124,92,255,.15);border:1px solid rgba(124,92,255,.35)} h1{font-size:18px;margin:0} h2{font-size:14px;margin:0} p{margin:0;color:var(--muted)}
+    .grid{display:grid;grid-template-columns:430px 1fr;gap:16px;align-items:start;margin-top:16px}.card,.box{background:radial-gradient(900px 260px at 30% 0%, rgba(124,92,255,.20), transparent 55%),linear-gradient(180deg, rgba(14,22,46,.92), rgba(9,14,28,.92));border:1px solid rgba(35,48,85,.95);box-shadow:0 20px 70px rgba(0,0,0,.60);border-radius:var(--radius)} .hd{display:flex;justify-content:space-between;gap:10px;align-items:center;padding:14px 16px;border-bottom:1px solid rgba(35,48,85,.65);background:linear-gradient(180deg, rgba(255,255,255,.04), transparent)} .bd{padding:16px}
+    label{display:block;margin:12px 0 6px;color:var(--muted);font-size:12px;font-weight:700} input,select,textarea{width:100%;padding:12px;border-radius:12px;border:1px solid rgba(35,48,85,.95);background:rgba(7,11,21,.50);color:var(--text);outline:none;font:inherit} input:focus,select:focus,textarea:focus{border-color:rgba(124,92,255,.85);box-shadow:0 0 0 3px rgba(124,92,255,.22)} textarea{min-height:110px;resize:vertical}
+    .row2>*{flex:1 1 180px}.btn{display:inline-flex;align-items:center;justify-content:center;padding:10px 12px;border-radius:12px;border:1px solid rgba(35,48,85,.75);background:rgba(11,18,36,.55);color:var(--text);font-weight:800;cursor:pointer;text-decoration:none}.btn.primary{background:linear-gradient(180deg, rgba(124,92,255,.95), rgba(97,75,224,.95));border-color:rgba(124,92,255,.7)} .btn.danger{background:linear-gradient(180deg, rgba(255,107,107,.95), rgba(210,75,75,.95));border-color:rgba(255,107,107,.55)} .btn.small{padding:8px 10px;border-radius:10px;font-size:12px}
+    .chip,.pill{font-size:11px;padding:6px 10px;border-radius:999px;border:1px solid rgba(35,48,85,.85);background:rgba(7,11,21,.40);color:var(--muted)} .pill.accent{border-color:rgba(124,92,255,.55);background:rgba(124,92,255,.12);color:#fff}
+    .notice{padding:10px 12px;border-radius:12px;border:1px solid rgba(255,107,107,.35);background:rgba(255,107,107,.10);color:#ffd1d1;margin-top:12px}.hidden{display:none !important}
+    .tab{padding:9px 14px;border-radius:14px;background:rgba(11,18,36,.45);border:1px solid rgba(35,48,85,.90);color:rgba(232,236,255,.78);cursor:pointer}.tab.active{background:linear-gradient(180deg, rgba(124,92,255,.30), rgba(124,92,255,.12));border-color:rgba(124,92,255,.70);color:#fff}
+    .list{display:flex;flex-direction:column;gap:12px;margin:12px 0 0;padding:0;list-style:none}.item{border:1px solid rgba(35,48,85,.70);border-radius:18px;padding:16px;background:linear-gradient(180deg, rgba(255,255,255,.03), transparent 38%),rgba(7,11,21,.28);box-shadow:0 18px 55px rgba(0,0,0,.45);display:flex;justify-content:space-between;gap:12px;align-items:flex-start}.titleLine{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.titleLine > div:first-child{font-size:20px;font-weight:900}.dateBlock{margin-top:10px}.dateLine{font-size:13px;font-weight:900;letter-spacing:.35px;margin:4px 0;text-transform:uppercase}.dateLine .label{color:rgba(232,236,255,.80)} .dateLine .val{color:#fff;padding:4px 10px;border-radius:12px;border:1px solid rgba(124,92,255,.35);background:rgba(124,92,255,.10);display:inline-block;margin-left:8px}
+    .details-preview,.notes-box,.track-box{margin-top:8px;padding:10px 12px;border-radius:12px;border:1px solid rgba(35,48,85,.45);background:rgba(7,11,21,.22)} .details-full{display:none;margin-top:10px}.details-full.show{display:block}.details-full pre{margin:0;padding:10px 12px;border-radius:12px;border:1px solid rgba(35,48,85,.55);background:rgba(7,11,21,.4);font-size:12px;line-height:1.55;white-space:pre-wrap;word-break:break-word;font-family:inherit;color:var(--text)}
+    .kpi{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.kpi3{grid-template-columns:repeat(3,1fr)}.kpi5{grid-template-columns:repeat(5,1fr)} .box{padding:12px}.num{font-size:18px;font-weight:800}.lbl{font-size:11px;color:var(--muted)}
+    table{width:100%;border-collapse:collapse;font-size:12px} th,td{padding:10px;border-bottom:1px solid rgba(35,48,85,.35);text-align:left} thead{color:var(--muted)}
+    .tracked-items{border:1px solid rgba(35,48,85,.55);border-radius:14px;overflow:hidden;background:rgba(7,11,21,.25)} .tracked-toolbar{padding:12px;border-bottom:1px solid rgba(35,48,85,.45)} .tracked-row{display:grid;grid-template-columns:1.15fr 1.2fr .8fr .6fr auto;gap:8px;padding:10px 12px;border-top:1px solid rgba(35,48,85,.35)} .tracked-row:first-child{border-top:0} .tracked-empty{padding:12px;color:var(--muted);font-size:12px}
+    .mini{font-size:11px;color:var(--muted)} .warn{padding:10px 12px;border-radius:12px;border:1px solid rgba(255,193,7,.28);background:rgba(255,193,7,.08);color:#f8e7b7;font-size:12px;margin-top:10px}
+    @media (max-width:1100px){.grid{grid-template-columns:1fr}.kpi,.kpi3,.kpi5{grid-template-columns:repeat(2,1fr)}} @media (max-width:760px){.row2,.tracked-row,.kpi,.kpi3,.kpi5{grid-template-columns:1fr;display:grid}.item{flex-direction:column}.actions{width:100%}}
+  </style>
+</head>
+<body>
+  <header><div class="wrap"><div class="topbar"><div class="brand"><div class="badge">📦</div><div><h1>Supplier Tracker</h1><p>Orders & supplier payments (secure login)</p></div></div><div class="actions"><a href="./inventory.html" class="btn">Inventory</a><div id="userChip" class="chip">Checking session…</div><button id="btnLogout" class="btn danger" type="button">Logout</button></div></div></div></header>
+  <main><div class="wrap">
+    <div id="authError" class="notice hidden" role="alert"></div>
+    <div class="grid">
+      <section class="card">
+        <div class="hd"><h2 id="formTitle">New Order</h2><div class="chip" style="border-style:dashed">Tracked items + free text</div></div>
+        <div class="bd">
+          <form id="orderForm">
+            <label>Customer Name *</label><input id="customer_name" required placeholder="e.g. Juan Dela Cruz" />
+            <label>Facebook Link / Profile</label><input id="fb_profile" placeholder="facebook.com/profile..." />
+            <div class="tracked-head" style="justify-content:space-between;margin-top:12px"><label style="margin:0">Tracked Items</label><button id="btnAddTrackedItem" class="btn small" type="button">+ Add Tracked Item</button></div>
+            <div class="tracked-items">
+              <div class="tracked-toolbar mini">Use this for products that exist in Inventory. These rows affect stock. Free text below does not.</div>
+              <div id="trackedItemsList"></div>
+              <div id="trackedItemsEmpty" class="tracked-empty">No tracked items yet.</div>
+            </div>
+            <div class="warn">Tracked items update inventory automatically. Free text <b>Order Details</b> below is only for notes, custom add-ons, and items you do not track in inventory.</div>
+            <label>Order Details *</label><textarea id="order_details" required placeholder="Free text order form, custom requests, non-inventory items, packaging notes..."></textarea>
+            <label>Attachment / Screenshot</label><input id="attachment" type="file" accept="image/*" />
+            <div class="row2"><div><label>Status</label><select id="status"><option value="pending">Pending</option><option value="processing">Processing</option><option value="shipped">Shipped</option><option value="delivered">Delivered</option><option value="cancelled">Cancelled</option></select></div><div><label>Order Date</label><input id="order_date" type="date" /></div></div>
+            <div class="row2"><div><label>Delivery Method</label><select id="delivery_method"><option value="jnt">J&T (Courier)</option><option value="lalamove">Lalamove</option><option value="walkin">Walk-in</option></select></div><div><label>Order Type</label><select id="order_type"><option value="onhand">On-hand</option><option value="mto">Made to Order</option></select></div></div>
+            <div class="row2"><div><label>Shipment Date</label><input id="shipment_date" type="date" /></div><div id="releaseWrap" class="hidden"><label>Release Date (Made to Order)</label><input id="release_date" type="date" /></div></div>
+            <div id="balanceWrap" class="hidden"><label>Remaining Balance (₱) — Made to Order</label><input id="remaining_balance" type="number" step="0.01" placeholder="e.g. 1025" /></div>
+            <div class="row2"><div><label>Paid for Product (₱)</label><input id="paid_product" type="number" step="0.01" placeholder="e.g. 1680" /></div><div><label>2FLY Fee (₱)</label><input id="paid_shipping" type="number" step="0.01" placeholder="e.g. 190" /></div></div>
+            <label>Private Notes</label><textarea id="notes" placeholder="Supplier notes, tracking #, etc."></textarea>
+            <div class="formActions"><button id="btnSave" class="btn primary" type="submit">Save Order</button><button id="btnClear" class="btn" type="button">Clear Form</button><span id="formMsg" class="chip" style="border-style:dashed">—</span></div>
+          </form>
+        </div>
+      </section>
+      <section class="card">
+        <div class="hd"><div class="tabs" id="tabs"><button class="tab active" data-tab="all" type="button">All</button><button class="tab" data-tab="jnt" type="button">J&T</button><button class="tab" data-tab="lalamove" type="button">Lalamove</button><button class="tab" data-tab="walkin" type="button">Walk-in</button><button class="tab" data-tab="onhand" type="button">On-hand</button><button class="tab" data-tab="mto" type="button">Made to Order</button></div><div id="countLabel" class="chip">0 orders</div></div>
+        <div class="bd">
+          <div class="filters"><input id="search" class="search" placeholder="Search name, details, or ID…" /><select id="statusFilter"><option value="all">All Status</option><option value="pending">Pending</option><option value="processing">Processing</option><option value="shipped">Shipped</option><option value="delivered">Delivered</option><option value="cancelled">Cancelled</option></select><select id="dateFilter"><option value="all">All Dates</option></select><button id="btnRefresh" class="btn" type="button">↻</button></div>
+          <div id="adminOnlyDashboard" class="hidden" style="margin-top:12px">
+            <div class="kpiTools"><button id="btnToggleShipping" class="btn" type="button">Show 2FLY</button></div>
+            <div class="kpi"><div class="box"><div class="num" id="kpiTotal">0</div><div class="lbl">TOTAL ORDERS</div></div><div class="box"><div class="num" id="kpiProductRev">₱0</div><div class="lbl">PRODUCT REVENUE</div></div><div class="box"><div class="num" id="kpiShipRev">₱0</div><div class="lbl">2FLY</div></div><div class="box"><div class="num" id="kpiTotalRev">₱0</div><div class="lbl">TOTAL COLLECTED</div></div></div>
+            <div class="kpi kpi3" style="margin-top:10px"><div class="box"><div class="num" id="kpiOrdersToday">0</div><div class="lbl">ORDERS TODAY</div></div><div class="box"><div class="num" id="kpiCustomersToday">0</div><div class="lbl">CUSTOMERS TODAY</div></div><div class="box"><div class="num" id="kpiRevenueToday">₱0</div><div class="lbl">REVENUE TODAY</div></div></div>
+            <div class="kpi kpi5" style="margin-top:10px"><div class="box"><div class="num" id="stPending">0</div><div class="lbl">PENDING</div></div><div class="box"><div class="num" id="stProcessing">0</div><div class="lbl">PROCESSING</div></div><div class="box"><div class="num" id="stShipped">0</div><div class="lbl">SHIPPED</div></div><div class="box"><div class="num" id="stDelivered">0</div><div class="lbl">DELIVERED</div></div><div class="box"><div class="num" id="stCancelled">0</div><div class="lbl">CANCELLED</div></div></div>
+          </div>
+          <ul id="orderList" class="list"></ul>
+        </div>
+      </section>
+    </div>
+  </div></main>
+</body></html>
